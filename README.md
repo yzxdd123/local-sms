@@ -26,7 +26,7 @@
 ```powershell
 python scripts\query_sms.py
 python scripts\query_sms.py --within 15
-python scripts\query_sms.py --query 浙里办
+python scripts\query_sms.py --query 验证码
 python scripts\query_sms.py --wait 90 --fresh
 ```
 
