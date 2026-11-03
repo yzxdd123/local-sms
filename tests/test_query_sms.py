@@ -42,10 +42,10 @@ class DatabaseTests(unittest.TestCase):
             "INSERT INTO properties VALUES ('1', 'secret', 'do-not-read', 0, 0)"
         )
         rows = [
-            ("zj", "10650001", "【浙里办】本次操作所需的验证码为：222222。", now_ms - 60 * 1000),
-            ("nat", "10650002", "【国家医疗保障局】验证码333333，5分钟内有效。", now_ms - 2 * 60 * 1000),
-            ("hn", "10650003", "【湖南省医疗保障局】短信验证码为：444444。", now_ms - 3 * 60 * 1000),
-            ("old", "10650004", "【天津市医疗保障局】短信验证码为：111111。", now_ms - 30 * 60 * 1000),
+            ("a", "10650001", "【星港通行证】本次操作所需的验证码为：222222。", now_ms - 60 * 1000),
+            ("b", "10650002", "【北桥办事】验证码333333，5分钟内有效。", now_ms - 2 * 60 * 1000),
+            ("c", "10650003", "【云页通知】短信验证码为：444444。", now_ms - 3 * 60 * 1000),
+            ("old", "10650004", "【旧港提醒】短信验证码为：111111。", now_ms - 30 * 60 * 1000),
         ]
         con.executemany(
             'INSERT INTO text_messages (id, "from", content, type, status, created_at, updated_at) '
@@ -69,15 +69,15 @@ class DatabaseTests(unittest.TestCase):
         payload = json.loads(result.stdout)
         contents = [item["content"] for item in payload["messages"]]
         self.assertEqual(len(contents), 4)
-        self.assertTrue(any("浙里办" in item for item in contents))
-        self.assertTrue(any("国家医疗保障局" in item for item in contents))
-        self.assertTrue(any("湖南省医疗保障局" in item for item in contents))
+        self.assertTrue(any("星港通行证" in item for item in contents))
+        self.assertTrue(any("北桥办事" in item for item in contents))
+        self.assertTrue(any("云页通知" in item for item in contents))
         self.assertNotIn("555555", result.stdout)
         self.assertNotIn("do-not-read", result.stdout)
         self.assertNotIn("code", payload["messages"][0])
 
     def test_query_is_only_a_substring_filter(self) -> None:
-        result = run_cli("--query", "湖南", db=self.db)
+        result = run_cli("--query", "云页通知", db=self.db)
         payload = json.loads(result.stdout)
         self.assertEqual(len(payload["messages"]), 1)
         self.assertIn("444444", payload["messages"][0]["content"])
@@ -89,8 +89,8 @@ class DatabaseTests(unittest.TestCase):
         self.assertFalse(any("111111" in item for item in contents))
 
     def test_redact_hides_codes_but_keeps_context(self) -> None:
-        result = run_cli("--query", "浙里办", "--redact", db=self.db)
-        self.assertIn("浙里办", result.stdout)
+        result = run_cli("--query", "星港通行证", "--redact", db=self.db)
+        self.assertIn("星港通行证", result.stdout)
         self.assertNotIn("222222", result.stdout)
         self.assertIn("<6位验证码>", result.stdout)
 
